@@ -3,6 +3,22 @@ window.onload = async () => {
   const artCanvas = document.createElement("canvas");
   const frontCanvas = document.querySelector("#artAreaCanvas");
 
+  // 録画用
+  const stream = artCanvas.captureStream();
+  const mime = MediaRecorder.isTypeSupported("video/webm; codecs=vp9")
+    ? "video/webm; codecs=vp9"
+    : "video/webm";
+  const mediaRecorder = new MediaRecorder(stream, { mimeType: mime });
+  const chunks = [];
+  mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+  mediaRecorder.onstop = (e) => exportVid(new Blob(chunks, { type: mime }));
+  const exportVid = (blob) => {
+    const a = document.createElement("a");
+    a.download = "canvas.webm";
+    a.href = URL.createObjectURL(blob);
+    a.click();
+  };
+
   // キャンバスのサイズ設定
   artCanvas.width = frontCanvas.width;
   artCanvas.height = frontCanvas.height;
@@ -14,10 +30,13 @@ window.onload = async () => {
   let showFps = false; // FPS表示フラグ
 
   // キーボードが押されたときの処理
-  document.onkeydown = (e) => {
+  document.onkeydown = async (e) => {
     switch (e.key) {
       case "f":
         showFps = !showFps;
+        break;
+      case "r":
+        mediaRecorder.stop();
         break;
     }
   };
@@ -76,14 +95,16 @@ window.onload = async () => {
     ctx.strokeStyle = `#${Number(rgb).toString(16)}`;
 
     let x = 0,
-      y = 0;
+      y = 0,
+      w = 0;
     while (!isPrime(x) || !isPrime(y)) {
       x = Math.floor(Math.random() * canvas.width);
       y = Math.floor(Math.random() * canvas.height);
+      w = Math.floor((Math.random() * canvas.width) / 4);
     }
+
     ctx.beginPath();
-    ctx.moveTo(ox, oy);
-    ctx.lineTo(x, y);
+    ctx.arc(x, y, w, 0, 2 * Math.PI);
     ctx.stroke();
 
     ox = x;
@@ -91,7 +112,7 @@ window.onload = async () => {
 
     drawText(
       ctx,
-      "Prime Number",
+      "Prime Number Circle",
       canvas.width / 2,
       canvas.height / 2,
       70,
@@ -99,7 +120,7 @@ window.onload = async () => {
     );
     drawText(
       ctx,
-      "Connect the coordinates of prime numbers and the colors of prime numbers with a line.",
+      "Connect the coordinates of prime numbers and the colors of prime numbers with a circle.",
       canvas.width / 2,
       canvas.height / 2 + 30,
       20,
@@ -142,5 +163,6 @@ window.onload = async () => {
   };
 
   // メイン描画処理開始
+  // mediaRecorder.start(); // 録画したいときはコメント外す
   requestAnimationFrame(view);
 };
