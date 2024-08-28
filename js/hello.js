@@ -1,9 +1,13 @@
 window.onload = async () => {
   const artCanvas = document.querySelector("#artAreaCanvas");
+  const bufferCanvas = document.createElement("canvas");
+  bufferCanvas.width = artCanvas.width;
+  bufferCanvas.height = artCanvas.height;
 
   let frameCount = 0; // FPSカウント
   let fpsTimer = 0; // FPS計測用タイマー
   let fps = 0; // FPS
+  let showFps = true; // FPS表示フラグ
 
   // FPS描画処理
   const fpsDraw = (canvas, ctx) => {
@@ -21,47 +25,99 @@ window.onload = async () => {
     ctx.fillText(fps + "fps", canvas.width, 30);
   };
 
+  // キーボードが押されたときの処理
+  document.onkeydown = async (e) => {
+    switch (e.key) {
+      case "f":
+        showFps = !showFps;
+        break;
+    }
+  };
+
   // Main描画処理
+  let ox = 0,
+    oy = 0,
+    mx = 0,
+    my = 0,
+    toggleX = 1,
+    toggleY = 1;
+
   const mainDraw = (canvas, ctx) => {
+    const strA = "Hello World!";
+
     ctx.textAlign = "center";
-    ctx.font = "bold 80px MS Gothic";
-
-    const strA = "Hello World";
-
+    ctx.font = "bold 80px Helvetica";
     ctx.fillStyle = "white";
-    ctx.fillText(strA, canvas.width / 2 + 1, canvas.height / 2 + 1);
-    ctx.fillText(strA, canvas.width / 2 - 1, canvas.height / 2 - 1);
+    ctx.fillText(strA, canvas.width / 2 + 2, canvas.height / 2 + 2);
+    ctx.fillText(strA, canvas.width / 2 - 2, canvas.height / 2 - 2);
+    ctx.fillText(strA, canvas.width / 2 - 2, canvas.height / 2 + 2);
+    ctx.fillText(strA, canvas.width / 2 + 2, canvas.height / 2 - 2);
     ctx.fillStyle = "black";
     ctx.fillText(strA, canvas.width / 2, canvas.height / 2);
 
-    ctx.fillStyle = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(
-      Math.random() * 255
-    )}, ${Math.floor(Math.random() * 255)})`;
-    ctx.font = "bold 30px MS Gothic";
+    const r = Math.floor(Math.random() * (255 - 150)) + 150;
+    const g = Math.floor(Math.random() * (255 - 150)) + 150;
+    const b = Math.floor(Math.random() * (255 - 150)) + 150;
+    ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+    ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+    ctx.beginPath();
+    ctx.arc(mx, my, 10, 0, 2 * Math.PI);
+    // ctx.moveTo(ox, oy);
+    // ctx.lineTo(mx, my);
+    ctx.stroke();
+    ctx.closePath();
+    ctx.fill();
+
+    const strB = strA.replace(/[! ]/g, "");
+    ctx.fillStyle = `rgb(${255 - r}, ${255 - g}, ${255 - b})`;
+    ctx.font = "bold 15px MS Gothic";
     ctx.fillText(
-      strA.split("")[Math.floor(Math.random() * strA.length)],
-      Math.random() * canvas.width,
-      Math.random() * canvas.height
+      strB.split("")[Math.floor(Math.random() * strB.length)],
+      mx,
+      my + 5
     );
+
+    ox = mx;
+    oy = my;
+
+    mx += 20 * toggleX;
+    if (mx > canvas.width || mx < 0) {
+      my += 20 * toggleY;
+      toggleX *= -1;
+    }
+    if (my > canvas.height) {
+      toggleY = -1;
+    }
+    if (my < 0) {
+      toggleY = 1;
+    }
   };
 
   // キャンバスのコンテキスト
-  const ctx = artCanvas.getContext("2d");
-
-  artCanvas.style.backgroundColor = "white";
+  const frontCtx = artCanvas.getContext("2d");
+  const bufferCtx = bufferCanvas.getContext("2d");
 
   // メインの描画処理
   const view = async () => {
-    // 描画の初期化
-    // ctx.textAlign = "start";
-    // ctx.fillStyle = "white";
-    // ctx.fillRect(0, 0, artCanvas.width, artCanvas.height);
+    frontCtx.fillStyle = "white";
+    frontCtx.fillRect(0, 0, artCanvas.width, artCanvas.height);
 
     // Main描画
-    mainDraw(artCanvas, ctx);
+    mainDraw(bufferCanvas, bufferCtx);
+
+    // フロントキャンバスにコピー
+    frontCtx.drawImage(
+      bufferCanvas,
+      0,
+      0,
+      bufferCanvas.width,
+      bufferCanvas.height
+    );
 
     // FPS描画
-    // fpsDraw(artCanvas, ctx);
+    if (showFps) {
+      fpsDraw(artCanvas, frontCtx);
+    }
 
     // 再帰処理
     requestAnimationFrame(view);
