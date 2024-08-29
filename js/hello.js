@@ -15,7 +15,7 @@ window.onload = async () => {
   const fpsDraw = (canvas, ctx) => {
     frameCount++;
     ctx.fillStyle = "white";
-    ctx.fillRect(canvas.width - 130, 0, canvas.width, 40);
+    ctx.fillRect(canvas.width - 110, 0, canvas.width, 40);
     ctx.textAlign = "end";
     ctx.fillStyle = "green";
     ctx.font = "bold 30px MS Gothic";
@@ -24,7 +24,7 @@ window.onload = async () => {
       fps = frameCount;
       frameCount = 0;
     }
-    ctx.fillText(fps + "fps", canvas.width - 30, 30);
+    ctx.fillText(fps + "fps", canvas.width - 10, 30);
   };
 
   // キーボードが押されたときの処理
@@ -46,9 +46,9 @@ window.onload = async () => {
 
   const mainDraw = (canvas, ctx) => {
     const strA = "Hello World!";
-
+    const fw = canvas.width / strA.length;
     ctx.textAlign = "center";
-    ctx.font = "bold 80px Helvetica";
+    ctx.font = `bold ${fw}px Helvetica`;
     ctx.fillStyle = "white";
     ctx.fillText(strA, canvas.width / 2 + 2, canvas.height / 2 + 2);
     ctx.fillText(strA, canvas.width / 2 - 2, canvas.height / 2 - 2);
