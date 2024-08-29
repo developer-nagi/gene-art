@@ -1,6 +1,8 @@
 window.onload = async () => {
   const artCanvas = document.querySelector("#artAreaCanvas");
   const bufferCanvas = document.createElement("canvas");
+  artCanvas.width = window.innerWidth;
+  artCanvas.height = window.innerHeight;
   bufferCanvas.width = artCanvas.width;
   bufferCanvas.height = artCanvas.height;
 
@@ -13,7 +15,7 @@ window.onload = async () => {
   const fpsDraw = (canvas, ctx) => {
     frameCount++;
     ctx.fillStyle = "white";
-    ctx.fillRect(canvas.width - 100, 0, canvas.width, 40);
+    ctx.fillRect(canvas.width - 130, 0, canvas.width, 40);
     ctx.textAlign = "end";
     ctx.fillStyle = "green";
     ctx.font = "bold 30px MS Gothic";
@@ -22,7 +24,7 @@ window.onload = async () => {
       fps = frameCount;
       frameCount = 0;
     }
-    ctx.fillText(fps + "fps", canvas.width, 30);
+    ctx.fillText(fps + "fps", canvas.width - 30, 30);
   };
 
   // キーボードが押されたときの処理
